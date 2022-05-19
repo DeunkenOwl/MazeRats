@@ -36,7 +36,7 @@ class Game:
     def __init__(self, gameId, screenSize=(500,500)):
         self.id = gameId
         self.pWent = np.array((False, False))
-        self.ratsPos = np.array(((1, 1), (8, 8)))
+        self.ratsPos = np.array(((1, 2), (7, 8)))
         self.ready = False
         # 0 - free space
         # 1 - wall
@@ -52,10 +52,22 @@ class Game:
                                    (1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
                                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1),)))
         self.maze.set_grid(screenSize)
+        self.winners = np.array((False, False))
 
     def reset_turn(self):
         self.pWent[0] = False
         self.pWent[1] = False
+
+    def move(self, playerId, flag):
+        print(playerId, " starts moving ", flag)
+        if flag == "U":
+            self.ratsPos[playerId][0] -= 1
+        elif flag == "D":
+            self.ratsPos[playerId][0] += 1
+        elif flag == "R":
+            self.ratsPos[playerId][1] += 1
+        elif flag == "L":
+            self.ratsPos[playerId][1] -= 1
 
 # width = 700
 # height = 700

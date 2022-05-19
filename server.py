@@ -32,30 +32,36 @@ def threaded_client(conn, playerId, gameId):
     while True:
         try:
             data = pickle.loads(conn.recv(2048*2))
-            response = ""
+            response = "N"
             if gameId in games:
                 # checks if player already went
                 if not games[gameId].pWent[playerId]:
                     if data != "W":
                         ratPos = games[gameId].ratsPos[playerId]
+                        tile = -1
                         if data == "U":
-                            ratPos[1] += 1
+                            tile = games[gameId].maze.layout[ratPos[0] - 1, ratPos[1]]
                         elif data == "D":
-                            ratPos[1] -= 1
+                            tile = games[gameId].maze.layout[ratPos[0] + 1, ratPos[1]]
                         elif data == "R":
-                            ratPos[0] += 1
+                            tile = games[gameId].maze.layout[ratPos[0], ratPos[1] + 1]
                         elif data == "L":
-                            ratPos[0] -= 1
-                        tile = games[gameId].maze.layout[ratPos[0], ratPos[1]]
+                            tile = games[gameId].maze.layout[ratPos[0], ratPos[1] - 1]
                         # if rat tries to move to empty space
                         if tile == 0:
-                            games[gameId].ratsPos[playerId] = ratPos
-                            # E - empty
+                            print("here1")
+                            games[gameId].move(playerId, data)
+                            print("here2")
                             response = data
                         # if rat tries to move inside wall
                         # O - occupied
                         elif tile == 1:
                             response = "O"
+                        # elif tile == 2:
+                        #     response = "W"
+                        #     games[gameId].
+                        elif tile == -1:
+                            print("Wrong code")
                         games[gameId].pWent[playerId] = True
                 else:
                     response = "W"

@@ -63,26 +63,26 @@ def main():
             run = False
             print("Couldn't get response")
             break
-
+        # print(ratPos)
         # if move is successful(space was empty)
         if response == "U":
-            ratPos[1] += 1
-        elif response == "D":
-            ratPos[1] -= 1
-        elif response == "R":
-            ratPos[0] += 1
-        elif response == "L":
             ratPos[0] -= 1
+        elif response == "D":
+            ratPos[0] += 1
+        elif response == "R":
+            ratPos[1] += 1
+        elif response == "L":
+            ratPos[1] -= 1
         elif response == "O":
             if action == "U":
-                maze.layout[ratPos[0]][ratPos[1] + 1] = 1
-            elif action == "D":
-                maze.layout[ratPos[0]][ratPos[1] - 1] = 1
-            elif action == "R":
-                maze.layout[ratPos[0] + 1][ratPos[1]] = 1
-            elif action == "L":
                 maze.layout[ratPos[0] - 1][ratPos[1]] = 1
-
+            elif action == "D":
+                maze.layout[ratPos[0] + 1][ratPos[1]] = 1
+            elif action == "R":
+                maze.layout[ratPos[0]][ratPos[1] + 1] = 1
+            elif action == "L":
+                maze.layout[ratPos[0]][ratPos[1] - 1] = 1
+        # print(ratPos)
         redrawWindow(win, maze, ratPos, response)
         clock.tick(10)
 
