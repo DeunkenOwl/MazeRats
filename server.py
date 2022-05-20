@@ -86,19 +86,36 @@ def threaded_server(gameId, playerCount):
 
         if all(games[gameId].pWent):
             games[gameId].reset_turn()
-            try:
-                for playerId in games[gameId].playerId:
-                    print("Here1")
-                    conn = games[gameId].connected[playerId]
-                    print("Here2")
-                    pickle.loads(conn.recv(2048 * 2))
-                    print("Here3")
-                    conn.send((pickle.dumps(action[playerId])))
-                    print("Here4")
-            except:
-                print("Failed to send turn action")
+            if not any(games[gameId].winners):
+                try:
+                    for playerId in games[gameId].playerId:
+                        conn = games[gameId].connected[playerId]
+                        pickle.loads(conn.recv(2048 * 2))
+                        conn.send((pickle.dumps(action[playerId])))
+                except:
+                    print("Failed to send turn action")
+                    run = False
+                    break
+            else:
+                # if anybody wins
                 run = False
-                break
+                try:
+                    for playerId in games[gameId].playerId:
+                        conn = games[gameId].connected[playerId]
+                        pickle.loads(conn.recv(2048 * 2))
+                        if games[gameId].winners[playerId]:
+                            conn.send((pickle.dumps("E")))
+                        else:
+                            conn.send((pickle.dumps("GG")))
+                        conn.sendall((pickle.dumps(games[gameId].winners)))
+                        pickle.loads(conn.recv(2048 * 2))
+                        # print(games[gameId].maze.layout)
+                        conn.sendall((pickle.dumps(games[gameId].maze.layout)))
+
+                except:
+                    print("Failed to send final action")
+                    run = False
+                    break
 
     print("Lost connection")
     try:

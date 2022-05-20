@@ -33,9 +33,9 @@ def main():
     ratPos = n.receive()
     print("Starting position is in: ", ratPos)
     # redrawWindow(win, maze)
-    winners = None
     text = None
     went = False
+    connectionLost = False
     oldAction = ""
     while run:
         action = "W"
@@ -66,6 +66,7 @@ def main():
             n.send(action)
         except:
             run = False
+            connectionLost = True
             print("Couldn't send action")
             break
         try:
@@ -73,6 +74,7 @@ def main():
             # print("Recieving: ", response)
         except:
             run = False
+            connectionLost = True
             print("Couldn't get response")
             break
         # print(ratPos)
@@ -99,38 +101,44 @@ def main():
                     maze.layout[ratPos[0]][ratPos[1] - 1] = 1
                 oldAction = ""
             elif response == "E":
-                redrawWindow(win, maze, ratPos, "You escaped...")
-                pygame.time.delay(2000)
+                if oldAction == "U":
+                    maze.layout[ratPos[0] - 1][ratPos[1]] = 2
+                elif oldAction == "D":
+                    maze.layout[ratPos[0] + 1][ratPos[1]] = 2
+                elif oldAction == "R":
+                    maze.layout[ratPos[0]][ratPos[1] + 1] = 2
+                elif oldAction == "L":
+                    maze.layout[ratPos[0]][ratPos[1] - 1] = 2
+                text = "You escaped..."
+                oldAction = "E"
+                run = False
+            elif response == "GG":
+                text = "Someone escaped..."
                 run = False
             went = False
         if response == "W":
             text = "Wait for opponent's turn..."
         redrawWindow(win, maze, ratPos, text)
         clock.tick(10)
+    pygame.time.delay(1000)
+    if connectionLost:
+        redrawWindow(win, maze, ratPos, "Connection lost!")
+        print("Connection lost!")
+        pygame.time.delay(2000)
+    else:
+        winners = n.receive()
+        n.send("OK")
+        maze.layout = n.receive()
+        # print(maze.layout)
+        text = ""
+        if all(winners):
+            text = "It's a tie!"
+        elif winners[playerId]:
+            text = "Victory!"
+        else:
+            text = "You lose!"
+        redrawWindow(win, maze, ratPos, text)
+        pygame.time.delay(5000)
 
-
-# def menu_screen():
-#     run = True
-#     clock = pygame.time.Clock()
-#
-#     while run:
-#         clock.tick(60)
-#         win.fill((128, 128, 128))
-#         font = pygame.font.SysFont("comicsans", 60)
-#         text = font.render("Click to Play!", 1, (255,0,0))
-#         win.blit(text, (100,200))
-#         pygame.display.update()
-#
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 run = False
-#             if event.type == pygame.MOUSEBUTTONDOWN:
-#                 run = False
-#
-#     main()
-#
-# while True:
-#     menu_screen()
 
 main()

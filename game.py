@@ -9,7 +9,6 @@ class Maze:
         self.grid = np.ndarray(self.shape, dtype=pygame.Rect)
         self.set_grid(screenSize)
         self.colors = np.array(((0, 0, 0), (255, 255, 0), (0, 255, 0), (255, 0, 0)))
-        self.winners = np.array((False, False))
 
     def set_grid(self, screenSize):
         rectWidth = screenSize[0] / self.shape[0]
@@ -23,11 +22,12 @@ class Maze:
                 x += rectWidth
             y += rectHeight
 
-    def draw(self, screen):
+    def draw(self, screen, textures=np.array((0, 0, 0), dtype=object)):
         # pygame.draw.rect(win, (255,0,0),(0, 0, 50, 50))
         for i in range(self.shape[0]):
             for j in range(self.shape[1]):
-                pygame.draw.rect(screen, self.colors[self.layout[i][j]], self.grid[i][j])
+                if not textures[self.layout[i][j]]:
+                    pygame.draw.rect(screen, self.colors[self.layout[i][j]], self.grid[i][j])
 
 
 class Game:
