@@ -1,6 +1,9 @@
 import socket
 from _thread import *
 import pickle
+
+import numpy as np
+
 from game import Game
 
 server = "10.0.33.189"
@@ -21,18 +24,26 @@ games = {}
 idCount = 0
 
 
-def threaded_client(conn, playerId, gameId):
+def threaded_server(gameId, playerCount):
     global idCount
     # sending id to player
-    conn.send(str.encode(str(playerId)))
+    # conn.send(str.encode(str(playerId)))
     # sending game settings
-    conn.send((pickle.dumps(games[gameId].maze.shape)))
+    # conn.send((pickle.dumps(games[gameId].maze.shape)))
     # sending start position
-    conn.send((pickle.dumps(games[gameId].ratsPos[playerId])))
-    while True:
-        try:
+    # conn.send((pickle.dumps(games[gameId].ratsPos[playerId])))
+    run = True
+    action = np.array(("", ""))
+    while run:
+        for playerId in games[gameId].playerId:
+            conn = games[gameId].connected[playerId]
             response = "N"
-            data = pickle.loads(conn.recv(2048*2))
+            try:
+                data = pickle.loads(conn.recv(2048*2))
+            except:
+                print("Can't get action from client!")
+                run = False
+                break
             if gameId in games:
                 # checks if player already went
                 if not games[gameId].pWent[playerId]:
@@ -52,28 +63,42 @@ def threaded_client(conn, playerId, gameId):
                             # print("here1")
                             games[gameId].move(playerId, data)
                             # print("here2")
-                            response = data
+                            action[playerId] = data
                         # if rat tries to move inside wall
                         # O - occupied
                         elif tile == 1:
-                            response = "O"
+                            action[playerId] = "O"
                         elif tile == 2:
-                            response = "E"
+                            action[playerId] = "E"
                             games[gameId].winners[playerId] = True
-                        elif tile == -1:
-                            print("Wrong code")
+                        else:
+                            print("ERROR in maze")
+                            run = False
+                            break
                         games[gameId].pWent[playerId] = True
                 else:
                     response = "W"
-
                 conn.send((pickle.dumps(response)))
-
             else:
+                print("Game vanished!")
+                run = False
                 break
-        except:
-            break
+
         if all(games[gameId].pWent):
             games[gameId].reset_turn()
+            try:
+                for playerId in games[gameId].playerId:
+                    print("Here1")
+                    conn = games[gameId].connected[playerId]
+                    print("Here2")
+                    pickle.loads(conn.recv(2048 * 2))
+                    print("Here3")
+                    conn.send((pickle.dumps(action[playerId])))
+                    print("Here4")
+            except:
+                print("Failed to send turn action")
+                run = False
+                break
 
     print("Lost connection")
     try:
@@ -81,10 +106,17 @@ def threaded_client(conn, playerId, gameId):
         print("Closing Game", gameId)
     except:
         pass
-    idCount -= 1
+    idCount -= 2
     conn.close()
 
 
+
+
+def send_base_info(playerId, gameId):
+    conn = games[gameId].connected[playerId]
+    conn.send(str.encode(str(playerId)))
+    conn.send((pickle.dumps(games[gameId].maze.shape)))
+    conn.send((pickle.dumps(games[gameId].ratsPos[playerId])))
 
 while True:
     conn, addr = s.accept()
@@ -100,4 +132,7 @@ while True:
         games[gameId].ready = True
         playerId = 1
 
-    start_new_thread(threaded_client, (conn, playerId, gameId))
+    games[gameId].connected[playerId] = conn
+    send_base_info(playerId, gameId)
+    if games[gameId].ready:
+        start_new_thread(threaded_server, (gameId, 2))

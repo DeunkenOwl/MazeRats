@@ -35,6 +35,8 @@ def main():
     # redrawWindow(win, maze)
     winners = None
     text = None
+    went = False
+    oldAction = ""
     while run:
         action = "W"
         text = ""
@@ -42,15 +44,23 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
                 pygame.quit()
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN and not went:
                 if event.key == pygame.K_UP:
                     action = "U"
+                    oldAction = "U"
+                    went = True
                 elif event.key == pygame.K_DOWN:
                     action = "D"
+                    oldAction = "D"
+                    went = True
                 elif event.key == pygame.K_RIGHT:
                     action = "R"
+                    oldAction = "R"
+                    went = True
                 elif event.key == pygame.K_LEFT:
                     action = "L"
+                    oldAction = "L"
+                    went = True
         try:
             # print("Sending: ", action)
             n.send(action)
@@ -66,28 +76,33 @@ def main():
             print("Couldn't get response")
             break
         # print(ratPos)
-        # if move is successful(space was empty)
-        if response == "U":
-            ratPos[0] -= 1
-        elif response == "D":
-            ratPos[0] += 1
-        elif response == "R":
-            ratPos[1] += 1
-        elif response == "L":
-            ratPos[1] -= 1
-        elif response == "O":
-            if action == "U":
-                maze.layout[ratPos[0] - 1][ratPos[1]] = 1
-            elif action == "D":
-                maze.layout[ratPos[0] + 1][ratPos[1]] = 1
-            elif action == "R":
-                maze.layout[ratPos[0]][ratPos[1] + 1] = 1
-            elif action == "L":
-                maze.layout[ratPos[0]][ratPos[1] - 1] = 1
-        elif response == "E":
-            redrawWindow(win, maze, ratPos, "You escaped...")
-            pygame.time.delay(2000)
-            run = False
+        # print(oldAction)
+        if response != "N" and response != "W":
+            # if move is successful(space was empty)
+            if response == "U":
+                ratPos[0] -= 1
+            elif response == "D":
+                ratPos[0] += 1
+            elif response == "R":
+                ratPos[1] += 1
+            elif response == "L":
+                ratPos[1] -= 1
+            elif response == "O":
+                # print(oldAction)
+                if oldAction == "U":
+                    maze.layout[ratPos[0] - 1][ratPos[1]] = 1
+                elif oldAction == "D":
+                    maze.layout[ratPos[0] + 1][ratPos[1]] = 1
+                elif oldAction == "R":
+                    maze.layout[ratPos[0]][ratPos[1] + 1] = 1
+                elif oldAction == "L":
+                    maze.layout[ratPos[0]][ratPos[1] - 1] = 1
+                oldAction = ""
+            elif response == "E":
+                redrawWindow(win, maze, ratPos, "You escaped...")
+                pygame.time.delay(2000)
+                run = False
+            went = False
         if response == "W":
             text = "Wait for opponent's turn..."
         redrawWindow(win, maze, ratPos, text)

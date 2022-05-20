@@ -30,12 +30,13 @@ class Maze:
                 pygame.draw.rect(screen, self.colors[self.layout[i][j]], self.grid[i][j])
 
 
-
-
 class Game:
     def __init__(self, gameId, screenSize=(500,500)):
         self.id = gameId
+        self.connected = np.ndarray(2, dtype=object)
+        self.playerId = np.array((0, 1))
         self.pWent = np.array((False, False))
+        self.allWent = False
         self.ratsPos = np.array(((1, 2), (7, 8)))
         self.ready = False
         # 0 - free space
