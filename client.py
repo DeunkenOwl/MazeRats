@@ -11,13 +11,13 @@ win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Client")
 
 
-def redrawWindow(win, maze, ratPos, flag):
+def redrawWindow(win, maze, ratPos, text):
     maze.draw(win)
     pygame.draw.rect(win, maze.colors[3], maze.grid[ratPos[0]][ratPos[1]])
     # W - wait
-    if flag == "W":
+    if text != "":
         font = pygame.font.SysFont("comicsans", 30)
-        text = font.render("Wait for opponent's turn...", 1, (255, 255, 255))
+        text = font.render(text, 1, (255, 255, 255))
         win.blit(text, (width / 2 - text.get_width() / 2, height / 2 - text.get_height() / 2))
     pygame.display.update()
 
@@ -33,9 +33,11 @@ def main():
     ratPos = n.receive()
     print("Starting position is in: ", ratPos)
     # redrawWindow(win, maze)
-
+    winners = None
+    text = None
     while run:
         action = "W"
+        text = ""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -82,8 +84,13 @@ def main():
                 maze.layout[ratPos[0]][ratPos[1] + 1] = 1
             elif action == "L":
                 maze.layout[ratPos[0]][ratPos[1] - 1] = 1
-        # print(ratPos)
-        redrawWindow(win, maze, ratPos, response)
+        elif response == "E":
+            redrawWindow(win, maze, ratPos, "You escaped...")
+            pygame.time.delay(2000)
+            run = False
+        if response == "W":
+            text = "Wait for opponent's turn..."
+        redrawWindow(win, maze, ratPos, text)
         clock.tick(10)
 
 

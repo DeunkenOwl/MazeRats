@@ -59,7 +59,7 @@ class Game:
         self.pWent[1] = False
 
     def move(self, playerId, flag):
-        print(playerId, " starts moving ", flag)
+        # print(playerId, " starts moving ", flag)
         if flag == "U":
             self.ratsPos[playerId][0] -= 1
         elif flag == "D":
