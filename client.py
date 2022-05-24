@@ -12,8 +12,10 @@ pygame.display.set_caption("Client")
 
 
 def redrawWindow(win, maze, ratPos, text):
-    maze.draw(win)
-    pygame.draw.rect(win, maze.colors[3], maze.grid[ratPos[0]][ratPos[1]])
+    # maze.draw(win)
+    maze.draw_textured(win)
+    win.blit(maze.scaled_textures[3], maze.grid[ratPos[0]][ratPos[1]])
+    # pygame.draw.rect(win, maze.colors[3], maze.grid[ratPos[0]][ratPos[1]])
     # W - wait
     if text != "":
         font = pygame.font.SysFont("comicsans", 30)
@@ -30,6 +32,7 @@ def main():
     mazeShape = n.receive()
     print("Maze shape:", mazeShape)
     maze = Maze(np.zeros(mazeShape, dtype=int), (width, height))
+    maze.set_scaled_textures()
     ratPos = n.receive()
     print("Starting position is in: ", ratPos)
     # redrawWindow(win, maze)
@@ -38,7 +41,7 @@ def main():
     connectionLost = False
     oldAction = ""
     while run:
-        print("run")
+        # print("run")
         action = "W"
         text = ""
         for event in pygame.event.get():
@@ -63,7 +66,7 @@ def main():
                     oldAction = "L"
                     went = True
         try:
-            print("Sending: ", action)
+            # print("Sending: ", action)
             n.send(action)
         except:
             run = False
@@ -72,7 +75,7 @@ def main():
             break
         try:
             response = n.receive()
-            print("Recieving: ", response)
+            # print("Recieving: ", response)
         except:
             run = False
             connectionLost = True

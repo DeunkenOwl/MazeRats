@@ -9,6 +9,18 @@ class Maze:
         self.grid = np.ndarray(self.shape, dtype=pygame.Rect)
         self.set_grid(screenSize)
         self.colors = np.array(((0, 0, 0), (255, 255, 0), (0, 255, 0), (255, 0, 0)))
+        self.textures = np.array((pygame.image.load('images/floor.png'),
+                                  pygame.image.load('images/wall.png'),
+                                  pygame.image.load('images/chest.png'),
+                                  pygame.image.load('images/rat.png')))
+        self.scaled_textures = np.ndarray(self.textures.size, dtype=object)
+        # self.set_scaled_textures()
+
+    def set_scaled_textures(self):
+        width = self.grid[0][0][2]
+        height = self.grid[0][0][3]
+        for i in range(self.textures.size):
+            self.scaled_textures[i] = pygame.transform.scale(self.textures[i], (width, height))
 
     def set_grid(self, screenSize):
         rectWidth = screenSize[0] / self.shape[0]
@@ -22,12 +34,16 @@ class Maze:
                 x += rectWidth
             y += rectHeight
 
-    def draw(self, screen, textures=np.array((0, 0, 0), dtype=object)):
+    def draw(self, screen):
         # pygame.draw.rect(win, (255,0,0),(0, 0, 50, 50))
         for i in range(self.shape[0]):
             for j in range(self.shape[1]):
-                if not textures[self.layout[i][j]]:
-                    pygame.draw.rect(screen, self.colors[self.layout[i][j]], self.grid[i][j])
+                pygame.draw.rect(screen, self.colors[self.layout[i][j]], self.grid[i][j])
+
+    def draw_textured(self, screen):
+        for i in range(self.shape[0]):
+            for j in range(self.shape[1]):
+                screen.blit(self.scaled_textures[self.layout[i][j]], self.grid[i][j])
 
 
 class Game:
