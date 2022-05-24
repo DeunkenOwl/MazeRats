@@ -118,13 +118,15 @@ def threaded_server(gameId, playerCount):
                     break
 
     print("Lost connection")
+    for i in range(games[gameId].connected.size):
+        games[gameId].connected[i].close()
     try:
         del games[gameId]
         print("Closing Game", gameId)
     except:
         pass
     idCount -= 2
-    conn.close()
+
 
 
 

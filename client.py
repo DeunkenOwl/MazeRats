@@ -5,8 +5,8 @@ import pickle
 from game import Maze
 pygame.font.init()
 
-width = 700
-height = 700
+width = 500
+height = 500
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Client")
 
@@ -38,6 +38,7 @@ def main():
     connectionLost = False
     oldAction = ""
     while run:
+        print("run")
         action = "W"
         text = ""
         for event in pygame.event.get():
@@ -62,7 +63,7 @@ def main():
                     oldAction = "L"
                     went = True
         try:
-            # print("Sending: ", action)
+            print("Sending: ", action)
             n.send(action)
         except:
             run = False
@@ -71,8 +72,13 @@ def main():
             break
         try:
             response = n.receive()
-            # print("Recieving: ", response)
+            print("Recieving: ", response)
         except:
+            run = False
+            connectionLost = True
+            print("Couldn't get response")
+            break
+        if response == None:
             run = False
             connectionLost = True
             print("Couldn't get response")
@@ -139,6 +145,8 @@ def main():
             text = "You lose!"
         redrawWindow(win, maze, ratPos, text)
         pygame.time.delay(5000)
+    n.close()
+    pygame.quit()
 
 
 main()
